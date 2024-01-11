@@ -9,6 +9,7 @@ class Camera:
         self.position = position
         self.orientation = glm.vec3(0.0, 0.0, -1.0)
         self.up = glm.vec3(0.0, 1.0, 0.0)
+        self.cameraMatrix = glm.mat4(1.0)
 
         self.speed = 0.01
         self.sensitivity = 50
@@ -16,17 +17,19 @@ class Camera:
         self.lastX = 0
         self.lastY = 0
 
-    def matrix(self, fov, near, far, shader, uniform):
+    def updateMatrix(self, fov, near, far):
         view = glm.mat4()
         proj = glm.mat4()
 
         view = glm.lookAt(self.position, self.position + self.orientation, self.up)
         proj = glm.perspective(glm.radians(fov), self.width/self.height, near, far)
 
-        res = proj * view
+        self.cameraMatrix = proj * view
 
+    def matrix(self, shader, uniform):
         projLoc = glGetUniformLocation(shader.ID, uniform)
-        glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm.value_ptr(res))
+        glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm.value_ptr(self.cameraMatrix))
+
 
     def inputs(self, event):
         keys = pg.key.get_pressed()
