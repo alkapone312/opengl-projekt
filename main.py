@@ -24,20 +24,36 @@ def main():
     pg.display.set_caption("Piramida sierpinskiego - OpenGL")
 
     vertices = numpy.array([
-        -0.5, 0.0,  0.5,    0.83, 0.70, 0.44,  0.0, 0.0,
-        -0.5, 0.0, -0.5,    0.83, 0.70, 0.44,  1.0, 0.0,
-         0.5, 0.0, -0.5,    0.83, 0.70, 0.44,  0.0, 0.0,
-         0.5, 0.0,  0.5,    0.83, 0.70, 0.44,  1.0, 0.0,
-         0.0, 0.8,  0.0,    0.92, 0.86, 0.76,  0.5, 1.0
+        # Position              # Color                # Texture      # Normals
+        -0.5,  0.0,  0.5,       0.83, 0.70, 0.44,      0.0, 0.0,      0.0, -1.0, 0.0, # Bottom side
+        -0.5,  0.0, -0.5,       0.83, 0.70, 0.44,      0.0, 1.0,      0.0, -1.0, 0.0, # Bottom side
+         0.5,  0.0, -0.5,       0.83, 0.70, 0.44,      1.0, 1.0,      0.0, -1.0, 0.0, # Bottom side
+         0.5,  0.0,  0.5,       0.83, 0.70, 0.44,      1.0, 0.0,      0.0, -1.0, 0.0, # Bottom side
+
+        -0.5,  0.0,  0.5,       0.83, 0.70, 0.44,      0.0, 0.0,      -0.8, 0.5, 0.0, # Left side
+        -0.5,  0.0, -0.5,       0.83, 0.70, 0.44,      1.0, 0.0,      -0.8, 0.5, 0.0, # Left side
+         0.0,  0.8,  0.0,       0.92, 0.86, 0.76,      0.5, 1.0,      -0.8, 0.5, 0.0, # Left side
+
+        -0.5,  0.0, -0.5,       0.83, 0.70, 0.44,      1.0, 0.0,      0.0, 0.5, -0.8, # Non-facing side
+         0.5,  0.0, -0.5,       0.83, 0.70, 0.44,      0.0, 0.0,      0.0, 0.5, -0.8, # Non-facing side
+         0.0,  0.8,  0.0,       0.92, 0.86, 0.76,      0.5, 1.0,      0.0, 0.5, -0.8, # Non-facing side
+
+         0.5,  0.0, -0.5,       0.83, 0.70, 0.44,      0.0, 0.0,      0.8, 0.5, 0.0, # Right side
+         0.5,  0.0,  0.5,       0.83, 0.70, 0.44,      1.0, 0.0,      0.8, 0.5, 0.0, # Right side
+         0.0,  0.8,  0.0,       0.92, 0.86, 0.76,      0.5, 1.0,      0.8, 0.5, 0.0, # Right side
+
+         0.5,  0.0,  0.5,       0.83, 0.70, 0.44,      1.0, 0.0,      0.0, 0.5, 0.8, # Facing side
+        -0.5,  0.0,  0.5,       0.83, 0.70, 0.44,      0.0, 0.0,      0.0, 0.5, 0.8, # Facing side
+         0.0,  0.8,  0.0,       0.92, 0.86, 0.76,      0.5, 1.0,      0.0, 0.5, 0.8 # Facing side
     ], dtype='float32')
 
     indices = numpy.array([
         0, 1, 2,
         0, 2, 3,
-        0, 1, 4,
-        1, 2, 4,
-        2, 3, 4,
-        3, 0, 4
+        4, 6, 5,
+        7, 9, 8,
+        10, 11, 12,
+        13, 15, 14
     ], dtype='uint32')
 
     lightVertices = numpy.array([
@@ -75,9 +91,10 @@ def main():
     elementBuffer = ElementBuffer(indices)
 
     float_size = 4
-    vertexArray.linkAttrib(vertexBuffer, 0, 3, GL_FLOAT, 8 * float_size, ctypes.c_void_p(0))
-    vertexArray.linkAttrib(vertexBuffer, 1, 3, GL_FLOAT, 8 * float_size, ctypes.c_void_p(3 * float_size))
-    vertexArray.linkAttrib(vertexBuffer, 2, 2, GL_FLOAT, 8 * float_size, ctypes.c_void_p(6 * float_size))
+    vertexArray.linkAttrib(vertexBuffer, 0, 3, GL_FLOAT, 11 * float_size, ctypes.c_void_p(0))
+    vertexArray.linkAttrib(vertexBuffer, 1, 3, GL_FLOAT, 11 * float_size, ctypes.c_void_p(3 * float_size))
+    vertexArray.linkAttrib(vertexBuffer, 2, 2, GL_FLOAT, 11 * float_size, ctypes.c_void_p(6 * float_size))
+    vertexArray.linkAttrib(vertexBuffer, 3, 3, GL_FLOAT, 11 * float_size, ctypes.c_void_p(8 * float_size))
     vertexArray.unbind()
     vertexBuffer.unbind()
     elementBuffer.unbind()
@@ -95,7 +112,7 @@ def main():
     lightVertexBuffer.unbind()
     lightElementBuffer.unbind()
 
-    lightColor = glm.vec4(1.0, 0.5, 0.0, 1.0)
+    lightColor = glm.vec4(1.0, 1.0, 1.0, 1.0)
 
     lightPos = glm.vec3(0.5, 0.5, 0.5)
     lightModel = glm.mat4(1.0)
@@ -111,6 +128,7 @@ def main():
     shader.activate()
     glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm.value_ptr(pyramidModel))
     glUniform4f(glGetUniformLocation(shader.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w)
+    glUniform3f(glGetUniformLocation(shader.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z)
 
     texture = Texture("textures/grass.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE)
     texture.texUni(shader, "tex0", 0)
@@ -134,6 +152,7 @@ def main():
         camera.updateMatrix(45, 0.1, 100)
 
         shader.activate()
+        glUniform3f(glGetUniformLocation(shader.ID, 'camPos'), camera.position.x, camera.position.y, camera.position.z)
         camera.matrix(shader, 'camMatrix')
         texture.bind()
         vertexArray.bind()
