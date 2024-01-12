@@ -13,9 +13,7 @@ import glm
 from Shader import Shader
 from Texture import Texture
 from Camera import Camera
-from VertexArray import VertexArray
-from VertexBuffer import VertexBuffer
-from ElementBuffer import ElementBuffer
+from Mesh import Mesh
 
 def main():
     pg.init()
@@ -24,28 +22,28 @@ def main():
     pg.display.set_caption("Piramida sierpinskiego - OpenGL")
 
     vertices = numpy.array([
-        # Position              # Color                # Texture      # Normals
-        -1.0, 0.0, 1.0,         0.0, 0.0, 0.0,         0.0, 0.0,      0.0, 1.0, 0.0,
-        -1.0, 0.0,-1.0,         0.0, 0.0, 0.0,         0.0, 1.0,      0.0, 1.0, 0.0,
-         1.0, 0.0,-1.0,         0.0, 0.0, 0.0,         1.0, 1.0,      0.0, 1.0, 0.0,
-         1.0, 0.0, 1.0,         0.0, 0.0, 0.0,         0.0, 1.0,      0.0, 1.0, 0.0
-    ], dtype='float32')
+        # Position        # Normals        # Color          # Texture
+        -1.0, 0.0, 1.0,   0.0, 1.0, 0.0,   0.0, 0.0, 0.0,   0.0, 0.0,
+        -1.0, 0.0,-1.0,   0.0, 1.0, 0.0,   0.0, 0.0, 0.0,   0.0, 1.0,
+         1.0, 0.0,-1.0,   0.0, 1.0, 0.0,   0.0, 0.0, 0.0,   1.0, 1.0,
+         1.0, 0.0, 1.0,   0.0, 1.0, 0.0,   0.0, 0.0, 0.0,   0.0, 1.0
+    ], dtype="float32")
 
     indices = numpy.array([
         0, 1, 2,
         0, 2, 3,
-    ], dtype='uint32')
+    ], dtype="uint32")
 
     lightVertices = numpy.array([
-        -0.1, -0.1, 0.1,
-        -0.1, -0.1, -0.1,
-        0.1, -0.1, -0.1,
-        0.1, -0.1, 0.1,
-        -0.1, 0.1, 0.1,
-        -0.1, 0.1, -0.1,
-        0.1, 0.1, -0.1,
-        0.1, 0.1, 0.1
-    ], dtype='float32')
+        -0.1, -0.1,  0.1,  0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+        -0.1, -0.1, -0.1,  0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+         0.1, -0.1, -0.1,  0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+         0.1, -0.1,  0.1,  0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+        -0.1,  0.1,  0.1,  0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+        -0.1,  0.1, -0.1,  0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+         0.1,  0.1, -0.1,  0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+         0.1,  0.1,  0.1,  0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+    ], dtype="float32")
 
     lightIndices = numpy.array([
         0, 1, 2,
@@ -60,37 +58,16 @@ def main():
         1, 4, 0,
         4, 5, 6,
         4, 6, 7
-    ], dtype='uint32')
+    ], dtype="uint32")
 
-    shader = Shader('shaders/basic.vert', 'shaders/basic.frag')
-
-    vertexArray = VertexArray()
-    vertexArray.bind()
-
-    vertexBuffer = VertexBuffer(vertices)
-    elementBuffer = ElementBuffer(indices)
-
-    float_size = 4
-    vertexArray.linkAttrib(vertexBuffer, 0, 3, GL_FLOAT, 11 * float_size, ctypes.c_void_p(0))
-    vertexArray.linkAttrib(vertexBuffer, 1, 3, GL_FLOAT, 11 * float_size, ctypes.c_void_p(3 * float_size))
-    vertexArray.linkAttrib(vertexBuffer, 2, 2, GL_FLOAT, 11 * float_size, ctypes.c_void_p(6 * float_size))
-    vertexArray.linkAttrib(vertexBuffer, 3, 3, GL_FLOAT, 11 * float_size, ctypes.c_void_p(8 * float_size))
-    vertexArray.unbind()
-    vertexBuffer.unbind()
-    elementBuffer.unbind()
-
+    textures = [
+        Texture("textures/planks.png", "diffuse", 0, GL_RGBA, GL_UNSIGNED_BYTE),
+        Texture("textures/planksSpec.png", "specular", 1, GL_RED, GL_UNSIGNED_BYTE)
+    ]
+    shader = Shader("shaders/basic.vert", "shaders/basic.frag")
     lightShader = Shader("shaders/light.vert", "shaders/light.frag");
-    lightVertexArray = VertexArray()
-    lightVertexArray.bind()
-
-    lightVertexBuffer = VertexBuffer(lightVertices)
-    lightElementBuffer = ElementBuffer(lightIndices)
-
-    lightVertexArray.linkAttrib(lightVertexBuffer, 0, 3, GL_FLOAT, 3 * float_size, ctypes.c_void_p(0))
-
-    lightVertexArray.unbind()
-    lightVertexBuffer.unbind()
-    lightElementBuffer.unbind()
+    floor = Mesh(vertices, indices, textures)
+    light = Mesh(lightVertices, lightIndices, textures)
 
     lightColor = glm.vec4(1.0, 1.0, 1.0, 1.0)
 
@@ -109,13 +86,6 @@ def main():
     glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm.value_ptr(pyramidModel))
     glUniform4f(glGetUniformLocation(shader.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w)
     glUniform3f(glGetUniformLocation(shader.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z)
-
-    texture = Texture("textures/planks.png", GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE)
-    texture.texUni(shader, "tex0", 0)
-    texture.unbind()
-    textureSpec = Texture("textures/planksSpec.png", GL_TEXTURE_2D, 1, GL_RGBA, GL_UNSIGNED_BYTE)
-    textureSpec.texUni(shader, "tex1", 1)
-    textureSpec.unbind()
     camera = Camera(display[0], display[1], glm.vec3(0, 0.5, 2))
     angle = 1
     glViewport(0, 0, display[0], display[1]);
@@ -133,30 +103,11 @@ def main():
 
         camera.updateMatrix(45, 0.1, 100)
 
-        shader.activate()
-        glUniform3f(glGetUniformLocation(shader.ID, 'camPos'), camera.position.x, camera.position.y, camera.position.z)
-        camera.matrix(shader, 'camMatrix')
-        texture.bind()
-        textureSpec.bind()
-        vertexArray.bind()
-        glDrawElements(GL_TRIANGLES, len(indices), GL_UNSIGNED_INT, None)
-
-        lightShader.activate()
-        camera.matrix(lightShader, "camMatrix")
-        lightVertexArray.bind()
-        glDrawElements(GL_TRIANGLES, len(lightIndices), GL_UNSIGNED_INT, None)
+        floor.draw(shader, camera)
+        light.draw(lightShader, camera)
 
         pg.display.flip()
         pg.time.wait(int(1000/30))
-
-
-    vertexArray.delete()
-    vertexBuffer.delete()
-    elementBuffer.delete()
-    texture.delete()
-    shader.delete()
-    lightShader.delete()
-
 
 if __name__ == "__main__":
     main()
