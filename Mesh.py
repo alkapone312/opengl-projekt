@@ -32,6 +32,7 @@ class Mesh:
         self.vertexArray.bind()
         numDiffuse = 0
         numSpecular = 0
+        numNormal = 0
         for i in range(0, len(self.textures)):
             num = ""
             type = self.textures[i].texType
@@ -41,6 +42,9 @@ class Mesh:
             elif type == "specular":
                 num = numSpecular
                 numSpecular += 1
+            elif type == "normal":
+                num = numNormal
+                numNormal += 1
             self.textures[i].texUni(shader, cast(type + str(num), c_char_p), i)
             self.textures[i].bind()
         glUniform3f(
