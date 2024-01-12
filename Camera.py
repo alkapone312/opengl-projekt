@@ -46,18 +46,20 @@ class Camera:
         if keys[pg.K_LCTRL]:
             self.position += self.speed * -self.up
 
-        mouseX, mouseY = pg.mouse.get_pos()
-        deltaX = mouseX - self.width/2
-        deltaY = mouseY - self.height/2
-        pg.mouse.set_visible(False)
-        pg.event.set_grab(True)
-        pg.mouse.set_pos(self.width/2, self.height/2)
-        rotX = self.sensitivity * (deltaY) / self.height
-        rotY = self.sensitivity * (deltaX) / self.width
+        if pg.mouse.get_pressed()[0] == True:
+            mouseX, mouseY = pg.mouse.get_pos()
+            deltaX = mouseX - self.width/2
+            deltaY = mouseY - self.height/2
+            pg.mouse.set_visible(False)
+            pg.event.set_grab(True)
+            pg.mouse.set_pos(self.width/2, self.height/2)
+            rotX = self.sensitivity * (deltaY) / self.height
+            rotY = self.sensitivity * (deltaX) / self.width
 
-        self.orientation = glm.rotate(self.orientation, glm.radians(-rotX), glm.normalize(glm.cross(self.orientation, self.up)))
-        self.orientation = glm.rotate(self.orientation, glm.radians(-rotY), self.up)
-
+            self.orientation = glm.rotate(self.orientation, glm.radians(-rotX), glm.normalize(glm.cross(self.orientation, self.up)))
+            self.orientation = glm.rotate(self.orientation, glm.radians(-rotY), self.up)
+        else:
+            pg.mouse.set_visible(True)
     def setPosition(self, position):
         self.position = position
 
