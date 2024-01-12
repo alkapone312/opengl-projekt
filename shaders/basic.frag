@@ -9,6 +9,7 @@ in vec2 texCoord;
 
 uniform sampler2D diffuse0;
 uniform sampler2D specular0;
+uniform sampler2D normal0;
 uniform vec3 camPos;
 uniform vec4 lightColor;
 uniform vec3 lightPos;
@@ -70,5 +71,5 @@ vec4 spotLight() {
 void main() {
     vec3 normalized = normalize(normal);
     
-    FragColor = spotLight();
+    FragColor = pointLight();
 }
