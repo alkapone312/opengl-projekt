@@ -10,7 +10,8 @@ class Texture:
         width, height = textureImg.get_size()
         bytes = textureImg.get_buffer().raw
         self.ID = glGenTextures(1)
-        glActiveTexture(slot)
+        glActiveTexture(GL_TEXTURE0 + slot)
+        self.unit = slot
         glBindTexture(texType, self.ID)
         glTexParameteri(texType, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
         glTexParameteri(texType, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
@@ -28,6 +29,7 @@ class Texture:
         glUniform1i(texUni, unit)
 
     def bind(self):
+        glActiveTexture(GL_TEXTURE0 + self.unit)
         glBindTexture(self.texType, self.ID)
 
     def unbind(self):

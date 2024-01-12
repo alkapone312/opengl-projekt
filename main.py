@@ -25,35 +25,15 @@ def main():
 
     vertices = numpy.array([
         # Position              # Color                # Texture      # Normals
-        -0.5,  0.0,  0.5,       0.83, 0.70, 0.44,      0.0, 0.0,      0.0, -1.0, 0.0, # Bottom side
-        -0.5,  0.0, -0.5,       0.83, 0.70, 0.44,      0.0, 1.0,      0.0, -1.0, 0.0, # Bottom side
-         0.5,  0.0, -0.5,       0.83, 0.70, 0.44,      1.0, 1.0,      0.0, -1.0, 0.0, # Bottom side
-         0.5,  0.0,  0.5,       0.83, 0.70, 0.44,      1.0, 0.0,      0.0, -1.0, 0.0, # Bottom side
-
-        -0.5,  0.0,  0.5,       0.83, 0.70, 0.44,      0.0, 0.0,      -0.8, 0.5, 0.0, # Left side
-        -0.5,  0.0, -0.5,       0.83, 0.70, 0.44,      1.0, 0.0,      -0.8, 0.5, 0.0, # Left side
-         0.0,  0.8,  0.0,       0.92, 0.86, 0.76,      0.5, 1.0,      -0.8, 0.5, 0.0, # Left side
-
-        -0.5,  0.0, -0.5,       0.83, 0.70, 0.44,      1.0, 0.0,      0.0, 0.5, -0.8, # Non-facing side
-         0.5,  0.0, -0.5,       0.83, 0.70, 0.44,      0.0, 0.0,      0.0, 0.5, -0.8, # Non-facing side
-         0.0,  0.8,  0.0,       0.92, 0.86, 0.76,      0.5, 1.0,      0.0, 0.5, -0.8, # Non-facing side
-
-         0.5,  0.0, -0.5,       0.83, 0.70, 0.44,      0.0, 0.0,      0.8, 0.5, 0.0, # Right side
-         0.5,  0.0,  0.5,       0.83, 0.70, 0.44,      1.0, 0.0,      0.8, 0.5, 0.0, # Right side
-         0.0,  0.8,  0.0,       0.92, 0.86, 0.76,      0.5, 1.0,      0.8, 0.5, 0.0, # Right side
-
-         0.5,  0.0,  0.5,       0.83, 0.70, 0.44,      1.0, 0.0,      0.0, 0.5, 0.8, # Facing side
-        -0.5,  0.0,  0.5,       0.83, 0.70, 0.44,      0.0, 0.0,      0.0, 0.5, 0.8, # Facing side
-         0.0,  0.8,  0.0,       0.92, 0.86, 0.76,      0.5, 1.0,      0.0, 0.5, 0.8 # Facing side
+        -1.0, 0.0, 1.0,         0.0, 0.0, 0.0,         0.0, 0.0,      0.0, 1.0, 0.0,
+        -1.0, 0.0,-1.0,         0.0, 0.0, 0.0,         0.0, 1.0,      0.0, 1.0, 0.0,
+         1.0, 0.0,-1.0,         0.0, 0.0, 0.0,         1.0, 1.0,      0.0, 1.0, 0.0,
+         1.0, 0.0, 1.0,         0.0, 0.0, 0.0,         0.0, 1.0,      0.0, 1.0, 0.0
     ], dtype='float32')
 
     indices = numpy.array([
         0, 1, 2,
         0, 2, 3,
-        4, 6, 5,
-        7, 9, 8,
-        10, 11, 12,
-        13, 15, 14
     ], dtype='uint32')
 
     lightVertices = numpy.array([
@@ -130,11 +110,13 @@ def main():
     glUniform4f(glGetUniformLocation(shader.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w)
     glUniform3f(glGetUniformLocation(shader.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z)
 
-    texture = Texture("textures/grass.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE)
+    texture = Texture("textures/planks.png", GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE)
     texture.texUni(shader, "tex0", 0)
     texture.unbind()
-    
-    camera = Camera(display[0], display[1], glm.vec3(0, 0, 2))
+    textureSpec = Texture("textures/planksSpec.png", GL_TEXTURE_2D, 1, GL_RGBA, GL_UNSIGNED_BYTE)
+    textureSpec.texUni(shader, "tex1", 1)
+    textureSpec.unbind()
+    camera = Camera(display[0], display[1], glm.vec3(0, 0.5, 2))
     angle = 1
     glViewport(0, 0, display[0], display[1]);
     glEnable(GL_DEPTH_TEST)
@@ -155,6 +137,7 @@ def main():
         glUniform3f(glGetUniformLocation(shader.ID, 'camPos'), camera.position.x, camera.position.y, camera.position.z)
         camera.matrix(shader, 'camMatrix')
         texture.bind()
+        textureSpec.bind()
         vertexArray.bind()
         glDrawElements(GL_TRIANGLES, len(indices), GL_UNSIGNED_INT, None)
 
