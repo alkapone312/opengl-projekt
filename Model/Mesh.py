@@ -2,9 +2,9 @@ import numpy
 from OpenGL.GL import *
 from ctypes import *
 
-from VertexArray import VertexArray
-from VertexBuffer import VertexBuffer
-from ElementBuffer import ElementBuffer
+from Model.VertexArray import VertexArray
+from Model.VertexBuffer import VertexBuffer
+from Model.ElementBuffer import ElementBuffer
 
 class Mesh:
     def __init__(self, vertices = numpy.array([], dtype="float32"), indices = numpy.array([], dtype="uint32")):

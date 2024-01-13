@@ -11,11 +11,12 @@ out vec3 color;
 out vec2 texCoord;
 
 uniform mat4 camMatrix;
+uniform mat4 model;
 
 void main() {
-    currentPos = aPos;
+    currentPos = vec3(model * vec4(aPos, 1.0f));
     normal = aNormal;
     color = aColor;
     texCoord = aTex;
-    gl_Position = camMatrix * vec4(currentPos, 1.0);
+    gl_Position = camMatrix * model * vec4(currentPos, 1.0);
 }

@@ -1,18 +1,19 @@
+import glm
 from OpenGL.GL import *
 
 class Renderer:
     def __init__(self):
         pass
 
-    def render(self, mesh, shader, textures, light, camera):
-        shader.activate()
-        mesh.vertexArray.bind()
+    def render(self, model, lights, camera):
+        model.shader.activate()
+        model.mesh.vertexArray.bind()
         numDiffuse = 0
         numSpecular = 0
         numNormal = 0
-        for i in range(0, len(textures)):
+        for i in range(0, len(model.textures)):
             num = ""
-            type = textures[i].texType
+            type = model.textures[i].texType
             if type == "diffuse":
                 num = numDiffuse
                 numDiffuse += 1
@@ -22,17 +23,18 @@ class Renderer:
             elif type == "normal":
                 num = numNormal
                 numNormal += 1
-            textures[i].texUni(shader, type + str(num), i)
-            textures[i].bind()
+            model.textures[i].texUni(model.shader, type + str(num), i)
+            model.textures[i].bind()
         glUniform3f(
-            glGetUniformLocation(shader.ID, "camPos"), 
+            glGetUniformLocation(model.shader.ID, "camPos"), 
             camera.position.x, 
             camera.position.y, 
             camera.position.z
         )
-        camera.matrix(shader, "camMatrix")
-        glUniform4f(glGetUniformLocation(shader.ID, "lightColor"), light.color.x, light.color.y, light.color.z, light.color.w)
-        glUniform3f(glGetUniformLocation(shader.ID, "lightPos"), light.position.x, light.position.y, light.position.z)
+        camera.matrix(model.shader, "camMatrix")
+        glUniform4f(glGetUniformLocation(model.shader.ID, "lightColor"), lights.color.x, lights.color.y, lights.color.z, lights.color.w)
+        glUniform3f(glGetUniformLocation(model.shader.ID, "lightPos"), lights.position.x, lights.position.y, lights.position.z)
+        glUniformMatrix4fv(glGetUniformLocation(model.shader.ID, "model"), 1, GL_FALSE, glm.value_ptr(model.model))
 
-        glDrawElements(GL_TRIANGLES, len(mesh.getIndices()), GL_UNSIGNED_INT, None)
+        glDrawElements(GL_TRIANGLES, len(model.mesh.getIndices()), GL_UNSIGNED_INT, None)
         pass

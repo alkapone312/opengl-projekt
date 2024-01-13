@@ -60,6 +60,7 @@ class Camera:
             self.orientation = glm.rotate(self.orientation, glm.radians(-rotY), self.up)
         else:
             pg.mouse.set_visible(True)
+            pg.event.set_grab(False)
     def setPosition(self, position):
         self.position = position
 

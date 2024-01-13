@@ -1,5 +1,5 @@
 from OpenGL.GL import *
-from VertexBuffer import VertexBuffer
+from Model.VertexBuffer import VertexBuffer
 
 class VertexArray:
     def __init__(self):

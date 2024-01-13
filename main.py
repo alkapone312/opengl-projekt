@@ -13,7 +13,10 @@ import glm
 from Shader import Shader
 from Texture import Texture
 from Camera import Camera
-from Mesh import Mesh
+from Model.Mesh import Mesh
+from Light import Light
+from Renderer import Renderer
+from Model.Model import Model
 
 def main():
     pg.init()
@@ -24,9 +27,9 @@ def main():
     vertices = numpy.array([
         # Position        # Normals        # Color          # Texture
         -1.0, 0.0, 1.0,   0.0, 1.0, 0.0,   0.0, 0.0, 0.0,   0.0, 0.0,
-        -1.0, 0.0,-1.0,   0.0, 1.0, 0.0,   0.0, 0.0, 0.0,   0.0, 1.0,
-         1.0, 0.0,-1.0,   0.0, 1.0, 0.0,   0.0, 0.0, 0.0,   1.0, 1.0,
-         1.0, 0.0, 1.0,   0.0, 1.0, 0.0,   0.0, 0.0, 0.0,   0.0, 1.0
+        -1.0, 0.0,-1.0,   0.0, 1.0, 0.0,   0.0, 0.0, 0.0,   0.0, 2.0,
+         1.0, 0.0,-1.0,   0.0, 1.0, 0.0,   0.0, 0.0, 0.0,   2.0, 2.0,
+         1.0, 0.0, 1.0,   0.0, 1.0, 0.0,   0.0, 0.0, 0.0,   0.0, 2.0
     ], dtype="float32")
 
     indices = numpy.array([
@@ -61,31 +64,31 @@ def main():
     ], dtype="uint32")
 
     textures = [
-        Texture("textures/planks.png", "diffuse", 0, GL_RGBA, GL_UNSIGNED_BYTE),
-        Texture("textures/planksSpec.png", "specular", 1, GL_RED, GL_UNSIGNED_BYTE)
+        Texture("textures/planks.png", "diffuse", 0),
+        Texture("textures/planksSpec.png", "specular", 1)
     ]
-    shader = Shader("shaders/basic.vert", "shaders/basic.frag")
-    lightShader = Shader("shaders/light.vert", "shaders/light.frag");
-    floor = Mesh(vertices, indices, textures)
-    light = Mesh(lightVertices, lightIndices, textures)
+    basicShader = Shader("shaders/basic.vert", "shaders/basic.frag")
+    lightShader = Shader("shaders/light.vert", "shaders/light.frag")
+    floorMesh = Mesh(vertices, indices)
+    lightMesh = Mesh(lightVertices, lightIndices)
 
-    lightColor = glm.vec4(1.0, 1.0, 1.0, 1.0)
+    floorModel = Model(
+        floorMesh,
+        basicShader,
+        textures
+    )
 
-    lightPos = glm.vec3(0.5, 0.5, 0.5)
-    lightModel = glm.mat4(1.0)
-    lightModel = glm.translate(lightModel, lightPos)
+    lightModel = Model(
+        lightMesh,
+        lightShader,
+        []
+    )
 
-    pyramidPos = glm.vec3(0.0, 0.0, 0.0)
-    pyramidModel = glm.mat4(1.0)
-    pyramidModel = glm.translate(pyramidModel, pyramidPos)
+    lightModel.translate(0.5, 0.5, 0.5)
 
-    lightShader.activate()
-    glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm.value_ptr(lightModel))
-    glUniform4f(glGetUniformLocation(lightShader.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w)
-    shader.activate()
-    glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm.value_ptr(pyramidModel))
-    glUniform4f(glGetUniformLocation(shader.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w)
-    glUniform3f(glGetUniformLocation(shader.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z)
+    # floorModel.rotate(90, 1, 0, 0)
+
+    renderer = Renderer()
     camera = Camera(display[0], display[1], glm.vec3(0, 0.5, 2))
     angle = 1
     glViewport(0, 0, display[0], display[1]);
@@ -103,8 +106,23 @@ def main():
 
         camera.updateMatrix(45, 0.1, 100)
 
-        floor.draw(shader, camera)
-        light.draw(lightShader, camera)
+        renderer.render(
+            floorModel,
+            Light(
+                glm.vec4(1.0, 1.0, 1.0, 1.0),
+                glm.vec3(0.5, 0.5, 0.5)
+            ),
+            camera
+        )
+
+        renderer.render(
+            lightModel,
+            Light(
+                glm.vec4(1.0, 1.0, 1.0, 1.0),
+                glm.vec3(0.5, 0.5, 0.5)
+            ),
+            camera
+        )
 
         pg.display.flip()
         pg.time.wait(int(1000/30))
