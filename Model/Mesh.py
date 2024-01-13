@@ -18,10 +18,9 @@ class Mesh:
         elementBuffer = ElementBuffer(indices)
 
         float_size = 4
-        self.vertexArray.linkAttrib(vertexBuffer, 0, 3, GL_FLOAT, 11 * float_size, ctypes.c_void_p(0))
-        self.vertexArray.linkAttrib(vertexBuffer, 1, 3, GL_FLOAT, 11 * float_size, ctypes.c_void_p(3 * float_size))
-        self.vertexArray.linkAttrib(vertexBuffer, 2, 3, GL_FLOAT, 11 * float_size, ctypes.c_void_p(6 * float_size))
-        self.vertexArray.linkAttrib(vertexBuffer, 3, 2, GL_FLOAT, 11 * float_size, ctypes.c_void_p(9 * float_size))
+        self.vertexArray.linkAttrib(vertexBuffer, 0, 3, GL_FLOAT, 8 * float_size, ctypes.c_void_p(0))
+        self.vertexArray.linkAttrib(vertexBuffer, 1, 3, GL_FLOAT, 8 * float_size, ctypes.c_void_p(3 * float_size))
+        self.vertexArray.linkAttrib(vertexBuffer, 2, 2, GL_FLOAT, 8 * float_size, ctypes.c_void_p(6 * float_size))
         self.vertexArray.unbind()
         vertexBuffer.unbind()
         elementBuffer.unbind()
