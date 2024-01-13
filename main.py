@@ -1,5 +1,6 @@
 import math
 import numpy
+import ctypes
 
 import pygame as pg
 from pygame.locals import *
@@ -13,55 +14,20 @@ import glm
 from Shader import Shader
 from Texture import Texture
 from Camera import Camera
-from Model.Mesh import Mesh
 from Light import Light
 from Renderer import Renderer
+from Skybox import Skybox
+from Model.Cube import Cube
 from Model.Model import Model
+from Model.Plane import Plane
+from Model.Tetrahedron import Tetrahedron
+from Loader.ObjLoader import ObjLoader
 
 def main():
     pg.init()
-    display = (800, 800)
+    display = (1024, 1024)
     pg.display.set_mode(display, DOUBLEBUF|OPENGL)
     pg.display.set_caption("Piramida sierpinskiego - OpenGL")
-
-    vertices = numpy.array([
-        # Position        # Normals        # Texture
-        -1.0, 0.0, 1.0,   0.0, 1.0, 0.0,   0.0, 0.0,
-        -1.0, 0.0,-1.0,   0.0, 1.0, 0.0,   0.0, 2.0,
-         1.0, 0.0,-1.0,   0.0, 1.0, 0.0,   2.0, 2.0,
-         1.0, 0.0, 1.0,   0.0, 1.0, 0.0,   0.0, 2.0
-    ], dtype="float32")
-
-    indices = numpy.array([
-        0, 1, 2,
-        0, 2, 3,
-    ], dtype="uint32")
-
-    lightVertices = numpy.array([
-        -0.1, -0.1,  0.1,  0.0, 0.0, 0.0, 0.0, 0.0,
-        -0.1, -0.1, -0.1,  0.0, 0.0, 0.0, 0.0, 0.0,
-         0.1, -0.1, -0.1,  0.0, 0.0, 0.0, 0.0, 0.0,
-         0.1, -0.1,  0.1,  0.0, 0.0, 0.0, 0.0, 0.0,
-        -0.1,  0.1,  0.1,  0.0, 0.0, 0.0, 0.0, 0.0,
-        -0.1,  0.1, -0.1,  0.0, 0.0, 0.0, 0.0, 0.0,
-         0.1,  0.1, -0.1,  0.0, 0.0, 0.0, 0.0, 0.0,
-         0.1,  0.1,  0.1,  0.0, 0.0, 0.0, 0.0, 0.0,
-    ], dtype="float32")
-
-    lightIndices = numpy.array([
-        0, 1, 2,
-        0, 2, 3,
-        0, 4, 7,
-        0, 7, 3,
-        3, 7, 6,
-        3, 6, 2,
-        2, 6, 5,
-        2, 5, 1,
-        1, 5, 4,
-        1, 4, 0,
-        4, 5, 6,
-        4, 6, 7
-    ], dtype="uint32")
 
     textures = [
         Texture("textures/planks.png", "diffuse", 0),
@@ -69,61 +35,53 @@ def main():
     ]
     basicShader = Shader("shaders/basic.vert", "shaders/basic.frag")
     lightShader = Shader("shaders/light.vert", "shaders/light.frag")
-    floorMesh = Mesh(vertices, indices)
-    lightMesh = Mesh(lightVertices, lightIndices)
 
-    floorModel = Model(
-        floorMesh,
-        basicShader,
-        textures
-    )
+    torus = Model(ObjLoader().load('models/torus.obj'), basicShader, textures)
 
-    lightModel = Model(
-        lightMesh,
-        lightShader,
-        []
-    )
+    floorModel = Plane(basicShader, textures)
+    lightModel = Cube(lightShader,[])
+    tetrahedronModel = Tetrahedron(basicShader, textures)
+    cubeModel = Cube(basicShader, textures)
 
-    lightModel.translate(0.5, 0.5, 0.5)
+    models = [
+        #floorModel,
+        lightModel,
+        tetrahedronModel,
+        torus
+    ]
 
-    # floorModel.rotate(90, 1, 0, 0)
-
+    lightPos = glm.vec3(0.8, 0.8, 0.8)
+    skybox = Skybox('sky')
     renderer = Renderer()
     camera = Camera(display[0], display[1], glm.vec3(0, 0.5, 2))
-    angle = 1
     glViewport(0, 0, display[0], display[1]);
     glEnable(GL_DEPTH_TEST)
     while True:
-        angle += 0.1
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 pg.quit()
                 quit()
             camera.inputs(event)
-
         glClearColor(0.07, 0.13, 0.17, 1.0)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-
         camera.updateMatrix(45, 0.1, 100)
-
-        renderer.render(
-            floorModel,
-            Light(
-                glm.vec4(1.0, 1.0, 1.0, 1.0),
-                glm.vec3(0.5, 0.5, 0.5)
-            ),
-            camera
-        )
-
-        renderer.render(
-            lightModel,
-            Light(
-                glm.vec4(1.0, 1.0, 1.0, 1.0),
-                glm.vec3(0.5, 0.5, 0.5)
-            ),
-            camera
-        )
-
+        torus.rotateY(1)
+        tetrahedronModel.rotateY(-1)
+        skybox.draw(camera)
+        lightPos = glm.rotate(0.02, glm.vec3(0, 1, 0)) * lightPos
+        lightModel.translate(lightPos.x, lightPos.y, lightPos.z)
+        lightModel.scale(0.1, 0.1, 0.1)
+        for model in models:
+            renderer.render(
+                model,
+                Light(
+                    glm.vec4(1.0, 1.0, 1.0, 1.0),
+                    glm.vec3(lightPos.x, lightPos.y, lightPos.z)
+                ),
+                camera
+            )
+        lightModel.scale(10, 10, 10)
+        lightModel.translate(-lightPos.x, -lightPos.y, -lightPos.z)
         pg.display.flip()
         pg.time.wait(int(1000/30))
 

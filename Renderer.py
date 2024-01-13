@@ -34,7 +34,10 @@ class Renderer:
         camera.matrix(model.shader, "camMatrix")
         glUniform4f(glGetUniformLocation(model.shader.ID, "lightColor"), lights.color.x, lights.color.y, lights.color.z, lights.color.w)
         glUniform3f(glGetUniformLocation(model.shader.ID, "lightPos"), lights.position.x, lights.position.y, lights.position.z)
-        glUniformMatrix4fv(glGetUniformLocation(model.shader.ID, "model"), 1, GL_FALSE, glm.value_ptr(model.model))
+        modelMatrix = model.getModelMatrix()
+        glUniformMatrix4fv(glGetUniformLocation(model.shader.ID, "model"), 1, GL_FALSE, glm.value_ptr(modelMatrix))
 
-        glDrawElements(GL_TRIANGLES, len(model.mesh.getIndices()), GL_UNSIGNED_INT, None)
-        pass
+        if len(model.mesh.getIndices()) != 0:
+            glDrawElements(GL_TRIANGLES, len(model.mesh.getIndices()), GL_UNSIGNED_INT, None)
+        else:
+            glDrawArrays(GL_TRIANGLES, 0, len(model.mesh.getVertices() / 8))

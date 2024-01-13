@@ -7,7 +7,7 @@ from Model.VertexBuffer import VertexBuffer
 from Model.ElementBuffer import ElementBuffer
 
 class Mesh:
-    def __init__(self, vertices = numpy.array([], dtype="float32"), indices = numpy.array([], dtype="uint32")):
+    def __init__(self, vertices, indices = numpy.array([], dtype="uint32")):
         self.vertices = vertices
         self.indices = indices
 
