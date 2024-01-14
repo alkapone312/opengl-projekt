@@ -41,3 +41,6 @@ class Renderer:
             glDrawElements(GL_TRIANGLES, len(model.mesh.getIndices()), GL_UNSIGNED_INT, None)
         else:
             glDrawArrays(GL_TRIANGLES, 0, len(model.mesh.getVertices() / 8))
+
+        for texture in model.textures:
+            texture.unbind()

@@ -6,8 +6,17 @@ class VerticesTransformer:
         self.vertices = vertices
         self.vertexLength = vertexLength
 
-    def translate(self, vec3):
-        return self
+    def translate(self, x, y, z):
+        newVertices = []
+        for i in range(0, len(self.vertices)):
+            if i%self.vertexLength == 0:
+                newVertices.append(self.vertices[i] + x) 
+                newVertices.append(self.vertices[i+1] + y) 
+                newVertices.append(self.vertices[i+2] + z) 
+            elif i%self.vertexLength > 2:
+                newVertices.append(self.vertices[i])
+
+        return np.array(newVertices, dtype='float32')
 
     def rotate(self, x, y, z):
         unit = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
@@ -56,4 +65,13 @@ class VerticesTransformer:
         return np.array(newVertices, dtype='float32')
 
     def scale(self, x, y, z):
-        return self
+        newVertices = []
+        for i in range(0, len(self.vertices)):
+            if i%self.vertexLength == 0:
+                newVertices.append(self.vertices[i] * x) 
+                newVertices.append(self.vertices[i+1] * y) 
+                newVertices.append(self.vertices[i+2] * z) 
+            elif i%self.vertexLength > 2:
+                newVertices.append(self.vertices[i])
+
+        return np.array(newVertices, dtype='float32')

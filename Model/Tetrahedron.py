@@ -7,10 +7,10 @@ from Model.VerticesTransformer import VerticesTransformer
 class Tetrahedron(Model):
     def __init__(self, shader, textures):
         normals = [
-            -glm.cross(glm.vec3(-0.5, -0.5, -0.5), glm.vec3(-0.5, 0.5, 0.5)), # 0, 1
-            -glm.cross(glm.vec3(-0.5, -0.5, -0.5), glm.vec3( 0.5, 0.5,-0.5)), # 3, 4
-            -glm.cross(glm.vec3( 0.5,  0.5, -0.5), glm.vec3( 0.5,-0.5, 0.5)), # 6, 7
-             glm.cross(glm.vec3(-0.5, -0.5, -0.5), glm.vec3( 0.5, 0.5,-0.5))  # 9, 10
+            glm.normalize(-glm.cross(glm.vec3(-0.5, -0.5, -0.5), glm.vec3(-0.5, 0.5, 0.5))), # 0, 1
+            glm.normalize(-glm.cross(glm.vec3(-0.5, -0.5, -0.5), glm.vec3( 0.5, 0.5,-0.5))), # 3, 4
+            glm.normalize(-glm.cross(glm.vec3( 0.5,  0.5, -0.5), glm.vec3( 0.5,-0.5, 0.5))), # 6, 7
+            glm.normalize( glm.cross(glm.vec3(-0.5, -0.5, -0.5), glm.vec3( 0.5, 0.5,-0.5)))  # 9, 10
         ]
         vertices = numpy.array([
             -0.5, -0.5, -0.5,   normals[0].x, normals[0].y, normals[0].z,  0.0, 0.0,
