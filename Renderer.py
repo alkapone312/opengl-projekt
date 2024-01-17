@@ -27,13 +27,32 @@ class Renderer:
             model.textures[i].bind()
         glUniform3f(
             glGetUniformLocation(model.shader.ID, "camPos"), 
-            camera.position.x, 
-            camera.position.y, 
+            camera.position.x,
+            camera.position.y,
             camera.position.z
         )
         camera.matrix(model.shader, "camMatrix")
-        glUniform4f(glGetUniformLocation(model.shader.ID, "lightColor"), lights.color.x, lights.color.y, lights.color.z, lights.color.w)
-        glUniform3f(glGetUniformLocation(model.shader.ID, "lightPos"), lights.position.x, lights.position.y, lights.position.z)
+        directLights = lights.getDirLights()
+        pointLights = lights.getPointLights()
+        spotLights = lights.getSpotLights()
+        glUniform1i(glGetUniformLocation(model.shader.ID, "numDir"), len(directLights))
+        glUniform1i(glGetUniformLocation(model.shader.ID, "numPoint"), len(pointLights))
+        glUniform1i(glGetUniformLocation(model.shader.ID, "numSpot"), len(spotLights))
+        for i in range(len(directLights)):
+            glUniform3f(glGetUniformLocation(model.shader.ID, "dirLight[0].direction"), directLights[0].direction.x, directLights[0].direction.y, directLights[0].direction.z)
+            glUniform4f(glGetUniformLocation(model.shader.ID, "dirLight[0].color"), directLights[0].color.x, directLights[0].color.y, directLights[0].color.z, directLights[0].color.w)
+        for i in range(0, len(pointLights)):
+            glUniform3f(glGetUniformLocation(model.shader.ID, "pointLights[" + str(i) + "].position"), pointLights[i].position.x, pointLights[i].position.y, pointLights[i].position.z)
+            glUniform4f(glGetUniformLocation(model.shader.ID, "pointLights[" + str(i) + "].color"), pointLights[i].color.x, pointLights[i].color.y, pointLights[i].color.z, pointLights[i].color.w)
+            glUniform1f(glGetUniformLocation(model.shader.ID, "pointLights[" + str(i) + "].quadratic"), pointLights[i].quadratic)
+            glUniform1f(glGetUniformLocation(model.shader.ID, "pointLights[" + str(i) + "].linear"), pointLights[i].linear)
+            glUniform1f(glGetUniformLocation(model.shader.ID, "pointLights[" + str(i) + "].constant"), pointLights[i].constant)
+        for i in range(0, len(spotLights)):
+            glUniform3f(glGetUniformLocation(model.shader.ID, "spotLights[" + str(i) + "].position"), spotLights[i].position.x, spotLights[i].position.y, spotLights[i].position.z)
+            glUniform4f(glGetUniformLocation(model.shader.ID, "spotLights[" + str(i) + "].color"), spotLights[i].color.x, spotLights[i].color.y, spotLights[i].color.z, spotLights[i].color.w)
+            glUniform3f(glGetUniformLocation(model.shader.ID, "spotLights[" + str(i) + "].direction"), spotLights[i].direction.x, spotLights[i].direction.y, spotLights[i].direction.z)
+            glUniform1f(glGetUniformLocation(model.shader.ID, "spotLights[" + str(i) + "].innerCone"), spotLights[i].innerCone)
+            glUniform1f(glGetUniformLocation(model.shader.ID, "spotLights[" + str(i) + "].outerCone"), spotLights[i].outerCone)
         modelMatrix = model.getModelMatrix()
         glUniformMatrix4fv(glGetUniformLocation(model.shader.ID, "model"), 1, GL_FALSE, glm.value_ptr(modelMatrix))
 
