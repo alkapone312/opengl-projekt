@@ -19,8 +19,10 @@ from Renderer import Renderer
 from Skybox import Skybox
 from Model.Cube import Cube
 from Model.Model import Model
+from Model.Mesh import Mesh
 from Model.Plane import Plane
 from Model.Tetrahedron import Tetrahedron
+from Model.VerticesTransformer import VerticesTransformer
 from Model.SierpinskiPyramid import SierpinskiPyramid
 from Loader.ObjLoader import ObjLoader
 
@@ -40,32 +42,66 @@ def main():
     grassTexture = [
         Texture("textures/grass.png", "diffuse", 0),
     ]
-    basicShader = Shader("shaders/basic.vert", "shaders/basic.frag")
+    metalTextures = [
+        Texture("textures/metal/metal.jpg", "diffuse", 0),
+        Texture("textures/metal/specular.jpg", "specular", 1),
+    ]
+    woodTextures = [
+        Texture("textures/wood/wood.jpg", "diffuse", 0),
+        Texture("textures/wood/specular.jpg", "specular", 1),
+    ]
+    rockTextures = [
+        Texture("textures/rock/rock.jpg", "diffuse", 0),
+    ]
+    basicShader = Shader()
     lightShader = Shader("shaders/light.vert", "shaders/light.frag")
 
-    #bird = Model(ObjLoader().load('models/bird.obj'), basicShader, birdTextures)
-
-    floorModel = Plane(basicShader, grassTexture)
-    lightModel = Cube(lightShader,[])
-    cubeModel = Cube(basicShader, plankTextures)
-    pyramidModel = SierpinskiPyramid(basicShader, plankTextures)
+    birdVertices = VerticesTransformer(ObjLoader().load('models/bird.obj').vertices).scale(0.005, 0.005, 0.005)
+    birdVertices = VerticesTransformer(birdVertices).translate(-0.1, 0.31, -4.5)
+    mausoleumVertices = VerticesTransformer(ObjLoader().load('models/mausoleum.obj').vertices).scale(0.01, 0.01, 0.01)
+    mausoleumVertices = VerticesTransformer(mausoleumVertices).translate(0, 0.8, -4)
+    lampVertices = VerticesTransformer(ObjLoader().load('models/lamp.obj').vertices).scale(0.009,0.009,0.009)
+    lampVertices2 = VerticesTransformer(lampVertices).rotate(0, 180, 0)
+    lamps = [
+        VerticesTransformer(lampVertices).translate(-0.5, 0, -2),
+        VerticesTransformer(lampVertices2).translate(0.5, 0, -2),
+        VerticesTransformer(lampVertices).translate(-0.5, 0, -1),
+        VerticesTransformer(lampVertices2).translate(0.5, 0, -1),
+        VerticesTransformer(lampVertices).translate(-0.5, 0, 0),
+        VerticesTransformer(lampVertices2).translate(0.5, 0, 0),
+    ]
+    commodeVertices = VerticesTransformer(ObjLoader().load('models/commode.obj').vertices).scale(0.01, 0.01, 0.01)
+    commodeVertices = VerticesTransformer(commodeVertices).rotate(0, -90, 0)
+    commodeVertices = VerticesTransformer(commodeVertices).translate(0, 0.15, -4.5)
+    pyramidModel = SierpinskiPyramid(basicShader, rockTextures)
+    pyramidModel.startMesh = Mesh(VerticesTransformer(pyramidModel.startMesh.vertices).scale(0.1, 0.1, 0.1))
+    pyramidModel.startMesh = Mesh(VerticesTransformer(pyramidModel.startMesh.vertices).translate(0.1, 0.03, -4.5))
+    pyramidModel.mesh = pyramidModel.startMesh
+    bird = Model(Mesh(birdVertices), basicShader, birdTextures)
+    mausoleum = Model(Mesh(mausoleumVertices), basicShader, plankTextures)
+    commode = Model(Mesh(commodeVertices), basicShader, woodTextures)
+    for i in range(len(lamps)):
+        lamps[i] = Model(Mesh(lamps[i]), basicShader, metalTextures)
+    floorModel = Plane(basicShader, grassTexture, 100, 100)
+    lightModel = Cube(lightShader, [])
 
     models = [
         floorModel,
         lightModel,
-        #bird
-        #pyramidModel
+        mausoleum,
+        commode,
+        pyramidModel,
+        bird
     ]
+    models.extend(lamps)
 
-    lightPos = glm.vec3(0.8, 0.8, 0.8)
-    skybox = Skybox('sky')
+    lightPos = glm.vec3(5, 5, 5)
+    skybox = Skybox('stars')
     renderer = Renderer()
     camera = Camera(display[0], display[1], glm.vec3(0, 0.5, 2))
     glViewport(0, 0, display[0], display[1]);
     glEnable(GL_DEPTH_TEST)
-    # bird.scale(0.3,0.3,0.3)
     pyramidModel.translate(0, 0.15, 0)
-    pressed = False
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -75,7 +111,7 @@ def main():
         glClearColor(0.07, 0.13, 0.17, 1.0)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         camera.updateMatrix(45, 0.1, 100)
-        # skybox.draw(camera)
+        skybox.draw(camera)
         lightPos = glm.rotate(0.02, glm.vec3(0, 1, 0)) * lightPos
         lightModel.translate(lightPos.x, lightPos.y, lightPos.z)
         lightModel.scale(0.1, 0.1, 0.1)

@@ -17,8 +17,8 @@ vec4 pointLight() {
     vec3 normal = normalize(Normal);
     vec3 lightVec = lightPos - CurrentPos;
     float dist = length(lightVec);
-    float a = 0.1;
-    float b = 0.7;
+    float a = 0.01;
+    float b = 0.01;
     float specularLight = 0.5f;
     float intensity = 1.0f / (a * dist * dist + b * dist + 1.0f);
     vec3 lightDir = normalize(lightVec);

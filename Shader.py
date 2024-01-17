@@ -1,7 +1,7 @@
 from OpenGL.GL import *
 
 class Shader:
-    def __init__(self, vertexFile: str, fragmentFile: str):
+    def __init__(self, vertexFile = 'shaders/basic.vert', fragmentFile = 'shaders/basic.frag'):
         vertexShaderSrc = open(vertexFile, 'r').read()
         fragmentShaderSrc = open(fragmentFile, 'r').read()
 

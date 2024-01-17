@@ -2,7 +2,7 @@ import numpy as np
 import math
 
 class VerticesTransformer:
-    def __init__(self, vertices, vertexLength):
+    def __init__(self, vertices, vertexLength = 8):
         self.vertices = vertices
         self.vertexLength = vertexLength
 

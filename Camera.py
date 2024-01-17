@@ -11,7 +11,7 @@ class Camera:
         self.up = glm.vec3(0.0, 1.0, 0.0)
         self.cameraMatrix = glm.mat4(1.0)
 
-        self.speed = 0.01
+        self.speed = 0.03
         self.sensitivity = 50
 
         self.lastX = 0

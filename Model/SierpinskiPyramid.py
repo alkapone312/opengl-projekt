@@ -9,8 +9,9 @@ class SierpinskiPyramid(Model):
         self.level = 0
         self.shader = shader
         self.textures = textures
+        self.startMesh = Tetrahedron(self.shader, self.textures).mesh
         super().__init__(
-            Tetrahedron(self.shader, self.textures).mesh,
+            self.startMesh,
             shader,
             textures
         )
@@ -27,7 +28,7 @@ class SierpinskiPyramid(Model):
             self.update()
         
     def update(self):
-        buff = [Mesh(Tetrahedron(self.shader, self.textures).mesh.vertices)]
+        buff = [self.startMesh]
         for i in range(self.level):
             a = []
             for mesh in buff:
